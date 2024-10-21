@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Room</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <style>
+        .body{
+            height: 100vh; /* Ensures content is centered vertically */
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 90%; /* Container width is 90% of the screen */
+            max-width: 1200px; /* Max width for larger screens */
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Content starts at the top */
+            align-items: center; /* Center horizontally */
+            padding-top: 40px;
+        }
+
+        .form-container {
+            transition: height 0.3s ease; /* Keep smooth transition */
+            width: 80%;
+            margin-top: 20px; /* Space between title and form */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Rounded corners */
+            padding: 20px; /* Padding inside the form */
+            background-color: white; /* Light background color */
+            max-height: 80vh; /* Max height to prevent overflow from the viewport */
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        /* Optional: Add a media query to adjust styles on smaller screens */
+        @media (max-width: 768px) {
+            .form-container {
+                width: 95%; /* Slightly wider on smaller screens */
+            }
+        }
+
+        .form-row {
+            padding-top:20px;
+            display: flex; /* Flexbox for horizontal layout */
+            justify-content: space-between; /* Space between elements */
+        }
+
+        .form-group {
+            flex: 1; /* Each form group takes equal space */
+            margin-right: 10px; /* Space between form groups */
+        }
+
+        .form-group:last-child {
+            margin-right: 0; /* Remove margin for the last item */
+        }
+
+        .availableRooms {
+            margin-top: 20px; /* Space above available rooms dropdown */
+            display: flex; /* Use flexbox for alignment */
+            flex-direction: column; /* Stack items vertically */
+            align-items: stretch; /* Make items take full width */
+            transition: all 0.3s ease; /* Smooth transition when the content changes */
+        }
+
+        .form-group select {
+            width: 100%; /* Full width for select dropdowns */
+        }
+
+        .table td:first-child {
+            padding-left: 0; /* Optional: Remove left padding from the first cell */
+        }
+
+        .table td:last-child {
+            padding-right: 0; /* Optional: Remove right padding from the last cell */
+        }
+        
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+    <div class="container">
+        <h2 class="text-center mb-4">Update Reservation</h2>
+        
+        <div class="form-container">
+            <form th:action="@{/reservations/{id}/update-room(id=${reservationDTO.id})}"th:object="${reservationDTO}" method="POST">
+                <input type="hidden" class="form-control" id="id" th:field="*{id}">
+                <input type="hidden" class="form-control" id="patientId" th:field="*{patientId}">
+                <input type="hidden" class="form-control" id="totalFee" th:field="*{totalFee}">
+                
+                <div class="form-group">
+                    <label for="assignedNurse">Assigned Nurse</label>
+                    <select class="form-control" id="assignedNurseId" th:field="*{assignedNurseId}">
+                        <option value="">Select Nurse</option>
+                        <option th:each="nurse : ${nurse}" th:value="${nurse.id}" th:text="${nurse.name}"></option>
+                    </select>
+                </div>
+
+                <!-- Form AJAX yang terpisah -->
+                <div id="searchForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateIn">Reservation Date In</label>
+                            <input type="date" class="form-control" id="dateIn" th:field="*{dateIn}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOut">Reservation Date Out</label>
+                            <input type="date" class="form-control" id="dateOut" th:field="*{dateOut}" required>
+                        </div>
+                        <div class="form-group" style="align-self: flex-end; margin-left: 10px;">
+                            <button type="button" class="btn btn-primary search-button" id="searchButton">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="availableRooms" id="availableRooms">
+                    <label for="room">Room</label>
+                    <select class="form-control" id="roomId" th:field="*{roomId}">
+                        <option value="">Select Room</option>
+                        <option th:each="room : ${room}" 
+                                th:value="${room.id}" 
+                                th:text="${room.name} + ' (' + ${room.pricePerDay} + ')'" 
+                                th:if="${room.id} == ${reservationDTO.roomId}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <div>
+                        <button type="submit" class="btn btn-primary mr-2" id="continueButton" >Continue</button>
+                        <button type="button" class="btn btn-danger" onclick="window.location.href='/reservations';">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const currentReservationRoomId = '[[${reservationDTO.roomId}]]';
+
+        function validateDates() {
+            const dateIn = new Date(document.getElementById('dateIn').value);
+            const dateOut = new Date(document.getElementById('dateOut').value);
+
+            // Check if Date Out is less than Date In
+            if (dateOut < dateIn) {
+                alert('Tanggal keluar tidak boleh kurang dari tanggal masuk.');
+                return false; // Validation failed
+            }
+
+            return true; // Validation passed
+        }
+
+        // Event listener for the "Continue" button
+        document.getElementById('continueButton').addEventListener('click', function(event) {
+            if (!validateDates()) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+
+        // Event listener untuk tombol search AJAX
+        document.getElementById('searchButton').addEventListener('click', function(event) {
+            event.preventDefault(); // Mencegah aksi default dari tombol
+
+            // Ambil nilai dari input tanggal
+            const dateIn = document.getElementById('dateIn').value;
+            const dateOut = document.getElementById('dateOut').value;
+
+            if (new Date(dateOut) < new Date(dateIn)) {
+                alert('Error: Date In harus kurang atau sama dengan Date Out.');
+                return; // Stop the function if the validation fails
+            }
+            // Kirim request AJAX
+            fetch(`/rooms/search?dateIn=${dateIn}&dateOut=${dateOut}`)
+                .then(response => {
+                    console.log('HTTP status:', response.status); // Log status HTTP
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const availableRoomsDiv = document.getElementById('availableRooms');
+                    const roomSelect = document.getElementById('roomId');
+                    roomSelect.innerHTML = ''; // Kosongkan dropdown sebelum memasukkan data baru
+
+                    // Periksa apakah ada ruangan yang tersedia
+                    if (data.length > 0) {
+                        // Tampilkan dropdown jika ada ruangan yang tersedia
+                        data.forEach(room => {
+                            const option = document.createElement('option');
+                            option.value = room.id;
+                            option.textContent = `${room.name} (${room.pricePerDay})`;
+                            if (room.id === currentReservationRoomId) {
+                                option.selected = true; // Pre-select this room if it matches
+                            }
+                            roomSelect.appendChild(option);
+                        });
+
+                        const continueButton = document.getElementById('continueButton');
+                    } else {
+                        // Sembunyikan dropdown jika tidak ada ruangan yang tersedia
+                        availableRoomsDiv.style.display = 'none';
+                        alert('Tidak ada ruangan yang tersedia untuk tanggal yang dipilih.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error); // Log error di konsol
+                    alert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.'); // Pesan kesalahan yang lebih ramah pengguna
+                });
+        });
+    </script>
+</body>
+</html>

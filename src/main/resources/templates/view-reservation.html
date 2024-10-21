@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            height: 100vh;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+    <div class="container mt-5 h-75 align-items-center">
+        <div class="card h-100" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #6c5ce7; color:white;">
+                <h5 class="mb-0"><span th:text="${reservation.id}"></h5>
+                <div>
+                    <a type="button" class="btn btn-info btn-sm me-2 text-white"
+                        th:href="@{/reservations/{reservationId}/update-room(reservationId=${reservation.id})}">Update Room
+                    </a>
+                    <a type="button" class="btn btn-info btn-sm me-2 text-white"
+                        th:href="@{/reservations/{reservationId}/update-facilities(reservationId=${reservation.id})}">Update Facility
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal">Delete</button>
+                </div>
+            </div>
+            <div class="card-body " style="padding:30px;">
+                <div class="row">
+                    <div class="col-md-3">
+                        <p><strong>ID</strong></p>
+                        <p><strong>Patient Name</strong></p>
+                        <p><strong>Email</strong></p>
+                        <p><strong>Gender</strong></p>
+                        <p><strong>Room Name</strong></p>
+                        <p><strong>Assigned Nurse</strong></p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <p>: <span th:text="${reservation.id}"></span></p>
+                        <p>: <span th:text="${patient.name}"></span></p>
+                        <p>: <span th:text="${patient.email}"></span></p>
+                        <p>: <span th:text="${patient.gender ? 'Male' : 'Female'}"></span></p>
+                        <p>: <a th:href="@{/rooms/{roomId}(roomId=${room.id})}" class="text-primary font-weight-bold "><span th:text="${room.name}"></span></a></p>
+                        <p>: <span th:text="${nurse}"></span></p>
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <p><strong>Date In</strong></p>
+                        <p><strong>Date Out</strong></p>
+                        <p><strong>Status</strong></p>
+                        <p><strong>Facilities</strong></p>
+                        <p><strong>Total Fee</strong></p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <p>: <span th:text="${#dates.format(reservation.dateIn, 'dd MMMM yyyy')}"></span></p>
+                        <p>: <span th:text="${#dates.format(reservation.dateOut, 'dd MMMM yyyy')}"></span></p>
+                        <p>: <span th:text="${status}"></span></p>
+                        <p>:<span th:each="facility, iterStat : ${reservation.facilities}">
+                                <span th:text="${facility.name}"></span><span th:if="${!iterStat.last}">, </span>
+                            </span>
+                        </p>
+                        <p>: <a href="#" class="text-primary" data-toggle="modal" data-target="#feeModal">Rp <span th:text="${reservation.totalFee}"></span></a></p>
+                    </div>
+                </div>
+            </div>
+
+            
+            <form id="deleteRoomForm" th:action="@{/reservations/{reservationId}/delete(reservationId=${reservation.id})}" method="post" style="display:none;"></form>
+
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Delete Reservation</h5>
+                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete <strong th:text="${reservation.id}"></strong> reservations?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="submitDeleteForm()">Yes</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="feeModal" tabindex="-1" role="dialog" aria-labelledby="feeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header justify-content-center" style="border-bottom: none;">
+                            <h5 class="modal-title" id="feeModalLabel">Fee Details</h5>
+                        </div>
+                        <div class="modal-body" style="border-bottom: none;">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><span th:text="${room.name} + ' '"></span>Room</p>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p>Rp <span th:text="${room.pricePerDay} + '/Day' "></span></p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p>Room Total  <span th:text="'(' + ${totalHari} + ' day)'"></span></p>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p>Rp <span th:text="${totalPrice}"></span></p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <span th:each="facility, iterStat : ${reservation.facilities}">
+                                        <p><span th:text="${facility.name}"></span></p>
+                                    </span>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span th:each="facility, iterStat : ${reservation.facilities}">
+                                        <p>Rp <span th:text="${facility.fee}"></span></p>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Total:</strong></p>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p>Rp <span th:text="${reservation.totalFee}"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center" style="border-top: none;">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script>
+        function submitDeleteForm() {
+            document.getElementById('deleteRoomForm').submit();
+        }
+
+    </script>
+</body>
+
+</html>

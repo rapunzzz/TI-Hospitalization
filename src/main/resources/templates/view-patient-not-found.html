@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Not Found</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <style>
+        body {
+            height: 100vh; /* Memastikan konten ditampilkan di tengah halaman */
+            margin: 0;
+            background-color: #f8f9fa; /* Warna latar belakang yang lembut */
+        }
+
+        .container {
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
+            padding: 20px; /* Jarak di dalam kotak */
+            text-align: center; /* Teks di tengah */
+        }
+
+        .patient-title {
+            font-size: 1.5em; /* Ukuran font yang lebih besar untuk judul */
+            margin-bottom: 10px; /* Jarak di bawah judul */
+        }
+
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"> </nav>
+    <div class="container">
+        <h3 class="patient-title">Patient Not Found</h3>
+        <p>Please insert this identity as a new patient before making the reservation.</p>
+        <form action="/reservations/create" method="GET">
+            <input type="hidden" name="step" value="1">
+            <button type="submit" class="btn btn-primary patient-button">Insert New Patient</button>
+        </form>
+    </div>
+</body>
+
+</html>

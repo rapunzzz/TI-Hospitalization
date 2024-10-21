@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hospitalization System</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav th:replace="~{fragments/navbar :: navbar}"> </nav>
+
+    <!-- Home Content -->
+    <div class="container text-center">
+        <div style="display:flex; justify-content:center; align-items:center;">
+            <div style="padding-top:20px;"> 
+                <h1 class="mb-4" style="font-size:50px;">Hospitalization</h1>
+                <h1 class="mb-4" style="font-size:50px;">System</h1>
+            </div>.
+            
+        </div>
+
+        <div class="row mt-4 justify-content-center">
+            <div class="col-md-4 d-flex justify-content-center">
+                <div class="bg-info text-white d-flex flex-column justify-content-center align-items-center" style="width: 16rem; height: 16rem;">
+                    <h2 th:text="${totalReservation}"></h2>
+                    <p>Reservations Created</p>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex justify-content-center">
+                <div class="bg-info text-white d-flex flex-column justify-content-center align-items-center" style="width: 16rem; height: 16rem;">
+                    <h2 th:text="${totalRoom}"></h2>
+                    <p>Rooms Recorded</p>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex justify-content-center">
+                <div class="bg-info text-white d-flex flex-column justify-content-center align-items-center" style="width: 16rem; height: 16rem;">
+                    <h2 th:text="${totalPatient}"></h2>
+                    <p>Patients Recorded</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

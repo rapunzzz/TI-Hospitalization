@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rooms Management</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <style>
+        #table thead {
+            border-top-left-radius: 8px; /* Sudut kiri atas */
+            border-top-right-radius: 8px; /* Sudut kanan atas */
+            background-color: #6c5ce7; /* Warna latar belakang */
+            color: white; /* Warna teks */
+            position: relative; /* Untuk memastikan posisi border-radius bekerja */
+        }
+
+        /* Menghapus border di bawah header tabel */
+        #table thead th:first-child {
+            border-top-left-radius: 8px; /* Sudut kiri atas */
+        }
+
+        #table thead th:last-child {
+            border-top-right-radius: 8px; /* Sudut kanan atas */
+        }
+
+        /* Untuk memberikan bayangan pada tabel */
+        #table {
+            border-radius: 8px; /* Sudut tabel melengkung */
+            overflow: hidden; /* Menghindari konten melampaui border-radius */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Bayangan tabel */
+        }
+    </style>
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"> </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Rooms</h1>
+            <a type="button" class="btn btn-primary m-2" href="/rooms/create">Add Room</a>
+        </div>
+        
+        <table id="table">
+            <thead class="text-light" bgcolor= "#6c5ce7">
+                <tr>
+                    <th>No</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Max Capacity</th>
+                    <th>Price Per Day</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="room, iterStat : ${listRoom}">
+                    <td th:text="${iterStat.index + 1}"></td> <!-- Display row number -->
+                    <td th:text="${room.id}"></td>
+                    <td th:text="${room.name}"></td>
+                    <td th:text="${room.maxCapacity}"></td>
+                    <td th:text="${room.pricePerDay}"></td>
+                    <td>
+                        <a type="button" class="btn btn-primary"
+                            th:href="@{/rooms/{roomId}(roomId=${room.id})}">Detail
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#table').DataTable({
+                "pagingType": "full_numbers",
+                "lengthMenu": [5, 10, 25, 50],
+                "pageLength": 10,
+                "language": {
+                    "lengthMenu": "_MENU_ entries per page",
+                    "search": "Search:",
+                    "paginate": {
+                        "first": "<<",
+                        "previous": "<",
+                        "next": ">",
+                        "last": ">>"
+                    }
+                }
+            });
+            $('.dataTables_filter').css({
+                'margin-bottom': '10px', // Adjust the bottom margin to add space
+            });
+        });
+    </script>
+</body>
+</html>

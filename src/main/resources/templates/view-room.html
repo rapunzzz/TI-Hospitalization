@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Details</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .form-row {
+            padding-bottom:10px;
+            display: flex; /* Flexbox for horizontal layout */
+            justify-content: space-between; /* Space between elements */
+        }
+
+        .form-group {
+            flex: 1; /* Each form group takes equal space */
+            margin-right: 10px; /* Space between form groups */
+        }
+
+        .form-group:last-child {
+            margin-right: 0; /* Remove margin for the last item */
+        }
+    </style>
+</head>
+<body>
+<nav th:replace="~{fragments/navbar :: navbar}"> </nav>
+<input type="hidden" id="roomId" name="roomId" th:value="${room.id}"/>
+<div class="container room-details" style="margin-top: 20px;">
+    <h2>Room Details</h2>
+
+    <div class="row mt-4">
+        <div class="row-md-6">
+            <p><strong>Room ID&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> <span th:text="${room.id}"></span></p>
+            <p><strong>Room Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> <span th:text="${room.name}"></span></p>
+            <p><strong>Max Capacity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> <span th:text="${room.maxCapacity}"></span> Pax</p>
+            <p><strong>Price&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> Rp <span th:text="${room.pricePerDay}"></span>/Day</p>
+            <p><strong>Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> <span th:text="${room.description}"></span></p>
+            <p><strong>Patient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong></p>
+        </div>
+        <div class="col-md-6">
+            <div id="searchForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateIn">Reservation Date In</label>
+                        <input type="date" class="form-control" id="dateIn" name="dateIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateOut">Reservation Date Out</label>
+                        <input type="date" class="form-control" id="dateOut" name="dateOut" required>
+                    </div>
+                    <div class="form-group" style="align-self: flex-end; margin-left: 10px;">
+                        <button type="button" class="btn btn-primary search-button" id="searchButton">Search</button>
+                    </div>
+                </div>
+            </div>
+            <p><strong>Quota Available:</strong> 
+                <span id="quotaAvailable" th:text="${quota}"></span>
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <table class="table table-bordered">
+            <thead class="table-header" style="background-color: #6c5ce7; color: #fff;">
+                <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody id="reservationTableBody">
+                
+            </tbody>
+        </table>
+    </div>
+
+    <form id="deleteRoomForm" th:action="@{/rooms/{roomId}/delete(roomId=${room.id})}" method="post" style="display:none;"></form>
+
+    <div class="d-flex justify-content-between mt-3">
+        <a type="button" class="btn btn-secondary"
+            th:href="@{/rooms}">Back
+        </a>
+        <div>
+            <a type="button" class="btn btn-warning"
+                th:href="@{/rooms/{roomId}/update(roomId=${room.id})}">Update
+            </a>
+            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Room</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong th:text="${room.name}"></strong> room?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="submitDeleteForm()">Yes</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+    <script>
+        function submitDeleteForm() {
+            document.getElementById('deleteRoomForm').submit();
+        }
+        // Event listener untuk tombol search AJAX
+        document.getElementById('searchButton').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default action of the button
+
+            // Get values from the input fields
+            const dateIn = document.getElementById('dateIn').value;
+            const dateOut = document.getElementById('dateOut').value;
+            const roomId = document.getElementById('roomId').value;
+
+            // Send AJAX request with the new dates
+            fetch(`/rooms/${roomId}/search?dateIn=${dateIn}&dateOut=${dateOut}`)
+                .then(response => {
+                    console.log('HTTP status:', response.status); // Log HTTP status
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tableBody = document.getElementById('reservationTableBody');
+                    tableBody.innerHTML = ''; // Clear the table body before adding new data
+                    
+                    // Update quota available
+                    document.getElementById('quotaAvailable').textContent = data.quota;
+                    // Check if there are available reservations
+                    if (data.reservationInclude.length > 0) {
+                        data.reservationInclude.forEach((reservation, index) => {
+                            const row = document.createElement('tr');
+                            console.log(reservation.patient.name);
+                            console.log('Response data:', data);
+                            // Create table cells based on the table header structure
+                            const cellNo = document.createElement('td');
+                            cellNo.textContent = index + 1;
+                            row.appendChild(cellNo);
+
+                            // Check if patient object exists before accessing its properties
+                            const patient = reservation.patient; // Default to an empty object if patient is undefined
+
+                            const cellName = document.createElement('td');
+                            cellName.textContent = patient.name; // Handle case where name might be undefined
+                            row.appendChild(cellName);
+
+                            const cellGender = document.createElement('td');
+                            cellGender.textContent = patient.gender ? 'Male' : 'Female'; // Handle case where gender might be undefined
+                            row.appendChild(cellGender);
+
+                            const cellEmail = document.createElement('td');
+                            cellEmail.textContent = patient.email; // Handle case where email might be undefined
+                            row.appendChild(cellEmail);
+
+                            // Append the row to the table body
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        // If no reservations are found, display a message
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.setAttribute('colspan', 5); // Adjust colspan to match number of columns
+                        cell.textContent = 'No reservations found for the selected dates.';
+                        cell.style.textAlign = 'center';
+                        row.appendChild(cell);
+                        tableBody.appendChild(row);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error); // Log error to console
+                    alert('An error occurred while fetching data. Please try again.'); // User-friendly error message
+                });
+        });
+
+    </script>
+</body>
+</html>

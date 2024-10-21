@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Facility</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <style>
+        body {
+            height: 100vh; /* Ensures content is centered vertically */
+            margin: 0;
+            background-color: #f8f9fa; /* Soft background color */
+        }
+
+        .container {
+            width: 90%; /* Container width is 90% of the screen */
+            max-width: 1200px; /* Max width for larger screens */
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Content starts at the top */
+            align-items: center; /* Center horizontally */
+            padding-top: 40px; /* Increased space between navbar and titles */
+        }
+
+        .form-container {
+            transition: height 0.3s ease; /* Keep smooth transition */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Rounded corners */
+            padding: 20px; /* Padding inside the form */
+            background-color: white; /* Light background color */
+            max-height: 80vh; /* Max height to prevent overflow from the viewport */
+            overflow: hidden; /* Prevent scrollbars */
+            background-color: white; /* Box color */
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        h2 {
+            margin: 10px 0; /* Margin above and below the title */
+            text-align: center; /* Center-align the text */
+        }
+
+        .table td:first-child {
+            padding-left: 0; /* Optional: Remove left padding from the first cell */
+        }
+
+        .table td:last-child {
+            padding-right: 0; /* Optional: Remove right padding from the last cell */
+        }
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+    <div class="container">
+        <h2>Step 3 of 3</h2>
+        <h2>Add Facilites (Optional)</h2>
+
+        <div class="form-container">
+            <form method="POST" th:action="@{/reservations/create/facility}" th:object="${reservationDTO}">
+                <input type="hidden" name="nik" th:value="${patient.NIK}"/>
+                <input type="hidden" name="roomId" th:value="${room.id}"/>
+                <input type="hidden" name="reservationId" th:value="${reservationId}"/>
+                <input type="hidden" name="patientId" th:value="*{patientId}"/>
+                <input type="hidden" name="assignedNurseId" th:value="*{assignedNurseId}"/>
+                <input type="hidden" name="dateIn" th:value="${#dates.format(reservationDTO.dateIn, 'yyyy-MM-dd')}"/>
+                <input type="hidden" name="dateOut" th:value="${#dates.format(reservationDTO.dateOut, 'yyyy-MM-dd')}"/>
+                <input type="hidden" name="totalFee" th:value="*{totalFee}"/>                
+
+                <div class="form-group">
+                    <label for="assignedNurse">Room</label>
+                    <select class="form-control" id="roomId" th:field="${room.id}" disabled>
+                        <option value="">Select Room</option>
+                        <option th:value="${room.id}"  th:text="${room.name} + ' (Rp ' + ${room.pricePerDay} + ', Quota Available ' + ${quota} + ', max ' + ${room.maxCapacity} + ' pax)'"></option>
+                    </select>
+                </div>
+
+                <div class="form-group column my-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="facility" class="fw-bold col-form-label">Facilities:</label>
+                        <button class="btn btn-primary" type="submit" name="addRow">Add Row</button>
+                    </div>
+                    <table class="table">
+                        <tbody >
+                            <tr th:each="facility, iterationStatus : *{facilities}" style="margin-bottom:20px;">
+                                <td>
+                                    <select th:field="*{facilities[__${iterationStatus.index}__].id}" class="form-control">
+                                        <option th:each="facilityExisting : ${listFacilities}" 
+                                                th:value="${facilityExisting.id}" 
+                                                th:text="${facilityExisting.name} + ' (' + ${facilityExisting.fee} + ')'"></option>
+                                    </select>
+                                </td>
+                                <td class="text-end">
+                                    <button th:value="${iterationStatus.index}" class="btn btn-danger" 
+                                            type="submit" name="deleteRow">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-danger" onclick="window.history.back()">Previous</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

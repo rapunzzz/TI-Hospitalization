@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <object th:include= ="~{fragments/common :: js}"  th:remove="tag"></object>
+    <object th:include= ="~{fragments/common :: css}"  th:remove="tag"></object>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            height: 100vh;
+        }
+        .container {
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
+        }
+        .search-container {
+            max-width: 600px; 
+            width: 100%;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .search-title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .search-button {
+            width: auto; /* Set button width to auto */
+            padding-left: 20px; 
+            padding-right: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"> </nav>
+    <div class="container">
+        <h3 class="search-title">Search Patient</h3>
+        <div class="search-container">
+            <form class="d-flex flex-column align-items-center" th:action="@{/reservations/create}" method="GET">
+                <div class="mb-3 w-100">
+                    <label for="nik" class="form-label">NIK</label>
+                    <input type="text" class="form-control" id="nik" name="nik" placeholder="NIK">
+                </div>
+                <button type="submit" class="btn btn-primary search-button">Search</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

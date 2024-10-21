@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Room</title>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            height: 100vh; /* Ensures content is centered vertically */
+            margin: 0;
+            background-color: #f8f9fa; /* Soft background color */
+        }
+
+        .container {
+            width: 90%; /* Container width is 90% of the screen */
+            max-width: 1200px; /* Max width for larger screens */
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Content starts at the top */
+            align-items: center; /* Center horizontally */
+            padding-top: 40px; /* Increased space between navbar and titles */
+        }
+
+        .form-container {
+            transition: height 0.3s ease; /* Keep smooth transition */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Rounded corners */
+            padding: 20px; /* Padding inside the form */
+            background-color: white; /* Light background color */
+            max-height: 80vh; /* Max height to prevent overflow from the viewport */
+            overflow: hidden; /* Prevent scrollbars */
+            background-color: white; /* Box color */
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        h2 {
+            margin: 10px 0; /* Margin above and below the title */
+            text-align: center; /* Center-align the text */
+        }
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+    <div class="container">
+        <h2>Step 1 of 3</h2>
+        <h2>Create Patient</h2>
+
+        <div class="form-container">
+            <form method="POST" th:action="@{/reservations/create/patient}" th:object="${patientDTO}">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Patient Name">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="nik" class="form-label">NIK</label>
+                        <input type="text" class="form-control" id="NIK" th:field="*{NIK}" placeholder="Patient NIK">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Patient Email">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Gender</label>
+                        <div class="gender-group">
+                            <label style="margin-right:30px;">
+                                <input type="radio" th:field="*{gender}" value="true" required /> Male
+                            </label>
+                            <label>
+                                <input type="radio" th:field="*{gender}" value="false" required /> Female
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="birthDate" th:field="*{birthDate}">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-start mt-3">
+                    <button type="submit" class="btn btn-primary me-2">Save and Continue</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='/reservations';">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <style>
+        body {
+            height: 100vh; /* Ensures content is centered vertically */
+            margin: 0;
+            background-color: #f8f9fa; /* Soft background color */
+        }
+
+        .container {
+            width: 50%; /* Container width is 90% of the screen */
+            max-width: 1200px; /* Max width for larger screens */
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Content starts at the top */
+            align-items: center; /* Center horizontally */
+            padding-top: 100px; /* Increased space between navbar and titles */
+        }
+
+        .form-container {
+            transition: height 0.3s ease; /* Keep smooth transition */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Rounded corners */
+            padding: 20px; /* Padding inside the form */
+            background-color: white; /* Light background color */
+            max-height: 80vh; /* Max height to prevent overflow from the viewport */
+            overflow: hidden; /* Prevent scrollbars */
+            background-color: white; /* Box color */
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        h2 {
+            margin: 10px 0; /* Margin above and below the title */
+            text-align: center; /* Center-align the text */
+        }
+    </style>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+    <div class="container">
+        <h2>Patient Found</h2>
+
+        <div class="form-container">
+            <div class="row mb-3 mt-3">
+                <div class="col-md-6">
+                    <label for="nik" class="form-label">NIK</label>
+                    <input type="text" class="form-control" id="NIK" th:value="${patient.NIK}" placeholder="Patient NIK" readonly>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" th:value="${patient.name}" placeholder="Patient Name" readonly>
+                </div>
+
+            </div>
+
+            <div class="row mb-3 mt-3">
+                <div class="col-md-6">
+                    <label for="gender" class="form-label">Gender</label>
+                    <input type="text" th:value="${patient.gender ? 'Male' : 'Female'}" class="form-control" id="gender" placeholder="Patient gender" readonly>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="text" class="form-control" id="bod" th:value="${bod}" readonly>
+                </div>
+            </div>
+            <form th:action="@{/reservations/create}" method="GET">
+                <input type="hidden" name="nik" th:value="${patient.NIK}"/>
+                <input type="hidden" name="step" value="2">
+                <div class="d-flex justify-content-center mt-3">
+                    <button type="submit" class="btn btn-primary patient-button">Create Reservation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
